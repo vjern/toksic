@@ -26,6 +26,9 @@ class Trie:
     leaves: Set[Any] = field(default_factory=set)
     # name: Optional[str] = _EqAll()
 
+    def init(self, items: List[Any]) -> 'Trie':
+        [self.insert(item) for item in items]; return self
+
     def insert(self, items: List) -> int:
         if not items:
             return 1
@@ -91,8 +94,15 @@ def from_string(pat: str) -> list:
 
 class TestTrie:
 
-    def test_find(self):
+    def test_init(self):
+        t = Trie().init(['a', 'b'])
+        assert t == Trie(
+            { 'a': Trie(),
+              'b': Trie() },
+            { 'a', 'b' }
+        )
 
+    def test_find(self):
         t = Trie()
         t.insert('a')
         assert t == Trie(
@@ -137,7 +147,6 @@ class TestTrie:
 
 
     def test_first(self):
-
         t = Trie()
         t.insert('==')
         assert t == Trie(
@@ -159,7 +168,6 @@ class TestTrie:
 
 
     def test_list(self):
-
         t = Trie()
         t.insert([0, 1])
         assert t == Trie(
@@ -179,7 +187,6 @@ class TestTrie:
 
 
     def test_any(self):
-
         t = Trie()
         t.insert([_any, 1])
         assert t == Trie(
@@ -199,7 +206,6 @@ class TestTrie:
 
 
     def test_any_multiple(self):
-
         t = Trie()
         t.insert([_any, 1, _any, 1])
         assert t == Trie(
@@ -220,7 +226,6 @@ class TestTrie:
 
 
     def test_any_ending(self):
-
         t = Trie()
         t.insert([_any, 1, _any])
         assert t == Trie(
@@ -243,7 +248,6 @@ class TestTrie:
 
 
     def test_consecutive_any(self):
-
         t = Trie()
         t.insert([_any, _any, 1, 3])
         assert t == Trie(
@@ -308,7 +312,6 @@ class TestTrie:
 
 
     def test_any_n(self):
-
         t = Trie()
         t.insert([_any_n, 333])
         assert t == Trie(
@@ -324,7 +327,6 @@ class TestTrie:
 
 
     def test_any_n_only(self):
-
         t = Trie()
         t.insert([_any_n])
         assert t == Trie(
@@ -340,7 +342,6 @@ class TestTrie:
 
 
     def test_multi_any_n(self):
-
         t = Trie()
         t.insert([_any_n, 3, _any_n, 33])
         assert t == Trie({
@@ -364,7 +365,6 @@ class TestTrie:
 
 
     def test_trailing_any_n(self):
-
         t = Trie()
         t.insert([99, _any_n])
         assert t == Trie(
@@ -385,7 +385,6 @@ class TestTrie:
 
 
     def test_consecutive_any_n(self):
-
         t = Trie()
         t.insert([_any_n, _any_n, 333])
         assert t == Trie(
@@ -401,7 +400,6 @@ class TestTrie:
 
 
     def test_any_n_ambiguous(self):
-
         t = Trie()
         t.insert([_any_n, 33])
         assert t.find([0, 33, 33]) == (False, 3)  # only the first 
@@ -410,6 +408,13 @@ class TestTrie:
     def test_from_string(self):
         assert from_string('_ + _') == [_any, '+', _any]
         assert from_string('_ ? _+ : _+') == [_any, '?', _any_n, ':', _any_n] 
+
+    def test_natural(self):
+        t = Trie()
+        t.insert('==')
+        t.insert('not in')
+        f = t.first('not in b')
+        assert f == (True, 6), f
 
 
 # still need to be able to tell the spans positions captured by any_n
