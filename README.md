@@ -20,6 +20,8 @@ A character-based tokenizer for programming languages. Will tokenize:
 ['a', '=', '=', 'b']
 ```
 
+## Keywords
+
 To capture specific keywords or operators such as `==`, you can use a Trie:
 
 ```py
@@ -27,8 +29,28 @@ To capture specific keywords or operators such as `==`, you can use a Trie:
 >>> trie = Trie(); trie.insert('==')
 >>> tokenize('a == b', trie)
 ['a', '==', 'b']
+
+>>> trie = Trie(); trie.insert('not in')
+>>> tokenize('a not in b', trie)
+['a', 'not in', 'b']
 ```
 
-## To add
+## String literals
 
-* Custom string literals (eg js-like `/regexes/`)
+Only double quotes string literals are supported by default, but you can introduce other patterns as well:
+
+```py
+# Custom anything
+>>> tokenize("'a$' = /b+/", literals=[("'", "'"), ("/", "/")])
+["'a$'", "=", "/b+/"]
+
+# Handle single & double quotes
+>>> tokenize("'a$' = \"b+\"", literals=[("'", "'"), ('"', '"')])
+["'a$'", "=", '"b+"']
+
+# Different start & end symbols
+>>> tokenize("^a+$ = \"b+\"", literals=[("^", "$"), ('"', '"')])
+["^a+$", "=", '"b+"']
+```
+
+The only limitation is that your string literals must be enclosed by single character symbols, though they can be different.
