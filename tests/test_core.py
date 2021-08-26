@@ -121,3 +121,9 @@ def test_custom_literals():
 
 def test_natural_language():
     assert toksic.tokenize('a not in b', trie.Trie().init(['not in'])) == ['a', 'not in', 'b']
+
+
+def test_retrace_tokens():
+    tstr = 'a   +   b c'
+    tokens = toksic.tokenize(tstr)
+    assert toksic.retrace_tokens(tokens) == tstr

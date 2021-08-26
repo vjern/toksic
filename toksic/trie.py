@@ -99,6 +99,15 @@ class TestTrie:
             { 'a', 'b' }
         )
 
+    def test_has(self):
+        t = Trie().init(['a', 'b'])
+        assert t.has('a')
+        assert not t.has('c')
+
+    def test_getitem(self):
+        t = Trie().init(['a', 'b'])
+        assert t['a'] == t.children['a']
+
     def test_find(self):
         t = Trie()
         t.insert('a')
