@@ -127,3 +127,12 @@ def test_retrace_tokens():
     tstr = 'a   +   b c'
     tokens = toksic.tokenize(tstr)
     assert toksic.retrace_tokens(tokens) == tstr
+
+
+def test_split():
+    assert list(toksic.split(['a', ';', 'b', 'c', ';', ';', 'a'], ';')) == [
+        ['a'],
+        ['b', 'c'],
+        [],
+        ['a']
+    ]
