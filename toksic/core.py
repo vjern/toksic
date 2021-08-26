@@ -7,6 +7,7 @@ from .trie import Trie
 
 punctuation = set(string.punctuation) - {"_", '"', "#", "-"}
 DEBUG = False
+DEBUG = True
 
 
 def count_leading_whitespace(row: str) -> int:
@@ -107,14 +108,15 @@ def tokenize(
 
         t = not quoted and specials and specials.get(char)
         if t:
-            print(char, 'may be in specials', row[i:])
+            print(char, 'may be in specials', repr(row[i:]))
             ok, tskip = specials.first(row[i:])
             print(ok, tskip)
             if ok:
                 print('this is ok')
                 skip += tskip
-                write(row[i:i + tskip])
                 flush(i)
+                write(row[i:i + tskip])
+                flush(i + tskip)
                 continue
 
         if quoted and char == closing_quote:

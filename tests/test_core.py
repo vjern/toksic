@@ -72,6 +72,7 @@ def test_full():
         toksic.Token('=').set(' =', 1, 3).dict(),
         toksic.Token('b').set(' b', 3, 5).dict()
     ]
+
     assert [c.dict() for c in toksic.tokenize('a  = b')] == [
         toksic.Token('a').set('a', 0, 1).dict(),
         toksic.Token('=').set('  =', 1, 4).dict(),
@@ -86,6 +87,14 @@ def test_full():
         toksic.Token('/').set(' /', 10, 12).dict(),
         toksic.Token('a').set(' a', 12, 14).dict(),
         toksic.Token('c').set(' \tc', 14, 17).dict(),
+    ]
+
+
+def test_full_specials():
+    assert [c.dict() for c in toksic.tokenize('a == b', specials=trie.Trie().init(["=="]))] == [
+        toksic.Token('a').set('a', 0, 1).dict(),
+        toksic.Token('==').set(' ==', 1, 4).dict(),
+        toksic.Token('b').set(' b', 4, 6).dict()
     ]
 
 
