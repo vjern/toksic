@@ -1,0 +1,3 @@
+[run]
+omit =
+    toksic/__main__.py
