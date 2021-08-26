@@ -49,10 +49,17 @@ class Token(str):
         }
 
 
-def tokenize(row: str, specials: Optional[Trie] = None) -> List[str]:
+def tokenize(
+    row: str,
+    specials: Optional[Trie] = None,
+    literals: List[Tuple[str, str]] = [('"', '"')]
+) -> List[str]:
+
+    literals_dict = {a: b for a, b in literals}
 
     tokens: List[str] = []
     token_vocs: List[str] = []
+    closing_quote = None
     quoted = False
     escaped = False
     was = None
@@ -77,7 +84,7 @@ def tokenize(row: str, specials: Optional[Trie] = None) -> List[str]:
 
     def print_detail():
         print(
-            'Q' if quoted else '-',
+            'Q' + closing_quote if quoted else '--',
             row[:i] + '\033[92;1m' + char + '\033[m' + row[i + 1:],
             tokens,
             ''.join(token_vocs),
@@ -107,15 +114,19 @@ def tokenize(row: str, specials: Optional[Trie] = None) -> List[str]:
                 write(row[i:i+tskip+1])
                 flush(i)
                 continue
+        
+        elif quoted and char == closing_quote:
+            write(char)
+            flush(i)
+            quoted = False
+            closing_quote = None
 
-        elif char in ['"']:
-            if quoted:
-                write(char)
-                flush(i)
-            else:
-                flush(i)
-                write(char)
-            quoted = not quoted
+        elif not quoted and char in literals_dict:
+            flush(i)
+            write(char)
+            closing_quote = literals_dict[char]
+            print('found string literal', char, closing_quote)
+            quoted = True
 
         elif char == '\\':
             escaped = True
@@ -147,7 +158,7 @@ def tokenize(row: str, specials: Optional[Trie] = None) -> List[str]:
 
     # if still in a literal
     if quoted:
-        raise SyntaxError('Expecting a closing quote')
+        raise SyntaxError(f'Expecting a closing quote {closing_quote}')
 
     return tokens
 
