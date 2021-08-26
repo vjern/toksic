@@ -1,10 +1,52 @@
-from typing import List, Optional
 import string
+from builtins import print as builtin_print
+from typing import List, Optional, Tuple
 
 from .trie import Trie
 
 
-punctuation = """!$%&'()*+,-./:;<=>?@[\\]^_`{|}~"""
+punctuation = set(string.punctuation) - {"_", '"', "#", "-"}
+DEBUG = False
+
+
+def count_leading_whitespace(row: str) -> int:
+    total = 0
+    for c in row:
+        t = {' ': 1, '\t': 4}.get(c, -1)
+        if t == -1:
+            break
+        total += 1
+    return total
+
+
+def level_indentation(rows: List[str]) -> List[str]:
+    rows = list(rows)
+    # check lowest common level of indentation
+    l = max(0, min(map(count_leading_whitespace, rows)))
+    # strip it
+    for r in rows:
+        # assert not r[:l].strip(), (l, repr(r[:l]))
+        yield r[l:]
+
+
+def print(*a, **kw):
+    if DEBUG:
+        builtin_print(*a, **kw)
+
+
+class Token(str):
+    bounds: Tuple[int, int]
+    string: str
+    def set(self, string: str, *bounds: int):
+        self.bounds = bounds
+        self.string = string
+        return self
+    def dict(self):
+        return {
+            'text': str(self),
+            'bounds': self.bounds,
+            'string': self.string
+        }
 
 
 def tokenize(row: str, specials: Optional[Trie] = None) -> List[str]:
@@ -14,15 +56,21 @@ def tokenize(row: str, specials: Optional[Trie] = None) -> List[str]:
     quoted = False
     escaped = False
     was = None
+    past = 0
     skip = 0
 
-    def flush():
+    def flush(i):
         nonlocal token_vocs
         nonlocal was
-        # print(f'flushing while {was = }')
+        nonlocal past
         was = None
-        token_vocs and tokens.append(''.join(token_vocs))
-        token_vocs = []
+        if token_vocs:
+            token = ''.join(token_vocs)
+            bounds, past = (past, i), i
+            a, b = bounds
+            token = Token(token).set(row[a:b], *bounds)
+            tokens.append(token)
+            token_vocs = []
 
     def write(char: str):
         token_vocs.append(char)
@@ -57,15 +105,15 @@ def tokenize(row: str, specials: Optional[Trie] = None) -> List[str]:
                 print('this is ok')
                 skip += tskip
                 write(row[i:i+tskip+1])
-                flush()
+                flush(i)
                 continue
 
         elif char in ['"']:
             if quoted:
                 write(char)
-                flush()
+                flush(i)
             else:
-                flush()
+                flush(i)
                 write(char)
             quoted = not quoted
 
@@ -75,13 +123,13 @@ def tokenize(row: str, specials: Optional[Trie] = None) -> List[str]:
 
         elif char in string.whitespace:
             if not quoted:
-                flush()
+                flush(i)
             else:
                 write(char)
         
         elif char in punctuation:
             if not quoted:
-                flush()
+                flush(i)
                 was = ('punctuation', char)
             write(char)
 
@@ -91,10 +139,10 @@ def tokenize(row: str, specials: Optional[Trie] = None) -> List[str]:
         else:
             if was:
                 # print(f'{was = }')
-                flush()
+                flush(i)
             write(char)
 
-    flush()
+    flush(i + 1)
     print_detail()
 
     # if still in a literal
@@ -102,3 +150,7 @@ def tokenize(row: str, specials: Optional[Trie] = None) -> List[str]:
         raise SyntaxError('Expecting a closing quote')
 
     return tokens
+
+
+def retrace_tokens(tokens: List[Token]) -> str:
+    return ''.join(t.string for t in tokens)
