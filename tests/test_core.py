@@ -38,7 +38,9 @@ def test_escaped_quotes():
 
 def test_function():
     assert toksic.tokenize('fun a(3, 2)') == ['fun', 'a', '(', '3', ',', '2', ')']
-    assert toksic.tokenize('fun a(a int, b int) { return a + b }') == ['fun', 'a', '(', 'a', 'int', ',', 'b', 'int', ')', '{', 'return', 'a', '+', 'b', '}']
+    assert toksic.tokenize('fun a(a int, b int) { return a + b }') == [
+        'fun', 'a', '(', 'a', 'int', ',', 'b', 'int', ')', '{', 'return', 'a', '+', 'b', '}'
+    ]
 
 
 def test_inline_comment():
@@ -94,8 +96,18 @@ def test_custom_literals():
     assert toksic.tokenize("/a = b/", literals=[("/", "/")]) == ["/a = b/"]
     assert toksic.tokenize("{a = b}", literals=[("{", "}")]) == ["{a = b}"]
 
-    assert toksic.tokenize(""" 'b =' + "'a' = b" """, literals=[("'", "'"), ('"', '"')]) == ["'b ='", "+", "\"'a' = b\""]
-    assert toksic.tokenize("'b =' + {'a' = b}", literals=[("'", "'"), ("{", "}")]) == ["'b ='", "+", "{'a' = b}"]
+    assert toksic.tokenize(
+        """ 'b =' + "'a' = b" """,
+        literals=[("'", "'"), ('"', '"')]
+    ) == [
+        "'b ='", "+", "\"'a' = b\""
+    ]
+    assert toksic.tokenize(
+        "'b =' + {'a' = b}",
+        literals=[("'", "'"), ("{", "}")]
+    ) == [
+        "'b ='", "+", "{'a' = b}"
+    ]
 
 
 def test_natural_language():

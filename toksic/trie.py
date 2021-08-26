@@ -3,15 +3,12 @@ from typing import List, Any, Dict, Tuple, Optional, Set
 
 
 class _Any:
-    def __str__(self): return 'ANY'
-    def __repr__(self): return str(self)
 
+    def __str__(self):
+        return 'ANY'
 
-class _EqAll:
-    def __str__(self): return 'ROOT'
-    def __repr__(self): return str(self)
-    def __eq__(self, o):
-        return True
+    def __repr__(self):
+        return str(self)
 
 
 # from .tree import Node
@@ -24,10 +21,11 @@ class Trie:
 
     children: Dict[Any, 'Trie'] = field(default_factory=dict)
     leaves: Set[Any] = field(default_factory=set)
-    # name: Optional[str] = _EqAll()
 
-    def init(self, items: List[Any]) -> 'Trie':
-        [self.insert(item) for item in items]; return self
+    def init(self, itemss: List[Any]) -> 'Trie':
+        for items in itemss:
+            self.insert(items)
+        return self
 
     def insert(self, items: List) -> int:
         if not items:
@@ -35,7 +33,6 @@ class Trie:
         first = items[0]
         if first is _any_n:
             child = self.children[_any] = self.children.get(_any, self)
-            # child.name = 'ANY'
             first = _any
         child = self.children[first] = self.children.get(first, Trie())
         child.name = str(first)
@@ -46,7 +43,7 @@ class Trie:
 
     def has(self, item: Any) -> bool:
         return item in self.children
-    
+
     def get(self, item: Any) -> Optional['Trie']:
         return self.children.get(item)
 
@@ -145,7 +142,6 @@ class TestTrie:
         assert t.find('db') == (False, 1)
         assert t.find('dc') == (False, 1)
 
-
     def test_first(self):
         t = Trie()
         t.insert('==')
@@ -159,13 +155,12 @@ class TestTrie:
         )
         assert t.find('==') == (True, 2)
         assert t.find('== a') == (False, 3)
-        
+
         assert t.find('==', take_first=True) == (True, 2)
         assert t.find('== a', take_first=True) == (True, 2)
 
         assert t.first('==') == (True, 2)
         assert t.first('== a') == (True, 2)
-
 
     def test_list(self):
         t = Trie()
@@ -182,9 +177,8 @@ class TestTrie:
         assert t.find([1, 1]) == (False, 1)
         assert t.find([0, 2]) == (False, 2)
         assert t.find([0, 2, 55]) != (False, 3)
-        
-        assert t.first([0, 2, 55]) != (True, 2)
 
+        assert t.first([0, 2, 55]) != (True, 2)
 
     def test_any(self):
         t = Trie()
@@ -203,7 +197,6 @@ class TestTrie:
 
         assert t.first([1, 1, 3]) == (True, 2)
         assert t.first([0, 1, 3]) == (True, 2)
-
 
     def test_any_multiple(self):
         t = Trie()
@@ -224,7 +217,6 @@ class TestTrie:
         assert t.find([1, 1, 2, 1]) == (True, 4)
         assert t.find([1, 2, 2, 1]) == (False, 2)
 
-
     def test_any_ending(self):
         t = Trie()
         t.insert([_any, 1, _any])
@@ -241,17 +233,16 @@ class TestTrie:
         assert t.find([0, 1, 2]) == (True, 3)
         assert t.find([1, 1, 2]) == (True, 3)
         assert t.find([1, 2, 2]) == (False, 2)
-        
+
         assert t.first([0, 1, 2, 3]) == (True, 3)
         assert t.first([1, 1, 2, 3]) == (True, 3)
         assert t.first([1, 2, 2, 3]) == (False, 2)
-
 
     def test_consecutive_any(self):
         t = Trie()
         t.insert([_any, _any, 1, 3])
         assert t == Trie(
-            { _any: Trie (
+            { _any: Trie(
                 { _any: Trie(
                     { 1: Trie(
                         { 3: Trie() },
@@ -263,12 +254,12 @@ class TestTrie:
         assert t.find([1, 2, 1, 3]) == (True, 4)
         assert t.find([33, 44, 1, 3]) == (True, 4)
         assert t.find([0, 0, 0, 3]) == (False, 3)
-        
+
         assert t.first([0, 0, 1, 3, 5, 5]) == (True, 4)
 
         t.insert([_any, _any])
         assert t == Trie(
-            { _any: Trie (
+            { _any: Trie(
                 { _any: Trie(
                     { 1: Trie(
                         { 3: Trie() },
@@ -283,7 +274,7 @@ class TestTrie:
 
         t.insert([_any, _any, 1, 3, _any, _any])
         assert t == Trie(
-            { _any: Trie (
+            { _any: Trie(
                 { _any: Trie(
                     { 1: Trie(
                         { 3: Trie(
@@ -301,7 +292,6 @@ class TestTrie:
         assert t.find([0, 0, 1, 3, 0, 2]) == (True, 6)
         assert t.find([0, 0, 1, 3, 4, 7]) == (True, 6)
 
-
     def test_any_trailing(self):
         t = Trie()
         t.insert([_any, _any])
@@ -309,7 +299,6 @@ class TestTrie:
         assert t.find([3, 4, 5]) == (False, 3)
         assert t.first([2, 5, 7]) == (True, 2)
         assert t.find([2]) == (False, 1)
-
 
     def test_any_n(self):
         t = Trie()
@@ -321,10 +310,9 @@ class TestTrie:
         assert t.find([3, 4, 333]) == (True, 3)
         assert t.find([3, 333]) == (True, 2)
         assert t.find([333]) == (True, 1)
-        
+
         assert t.first([3, 4, 333, 222]) == (True, 3)
         assert t.first([3, 333, 3]) == (True, 2)
-
 
     def test_any_n_only(self):
         t = Trie()
@@ -336,10 +324,9 @@ class TestTrie:
         assert t.find([3, 4, 333]) == (True, 3)
         assert t.find([3, 333]) == (True, 2)
         assert t.find([333]) == (True, 1)
-        
+
         assert t.first([3, 4, 333, 222]) == (True, 1)
         assert t.first([3, 333, 3]) == (True, 1)
-
 
     def test_multi_any_n(self):
         t = Trie()
@@ -358,11 +345,10 @@ class TestTrie:
         assert t.find([0, 3, 4, 33]) == (True, 4)
         assert t.find([0, 0, 3, 4, 33]) == (True, 5)
         assert t.find([0, 0, 3, 4, 77, 33]) == (True, 6)
-        
+
         assert t.first([0, 3, 4, 33, 55]) == (True, 4)
         assert t.first([0, 0, 3, 4, 33, 77]) == (True, 5)
         assert t.first([0, 0, 3, 4, 77, 33, 66]) == (True, 6)
-
 
     def test_trailing_any_n(self):
         t = Trie()
@@ -378,11 +364,10 @@ class TestTrie:
         assert t.find([99, 3, 4, 333]) == (True, 4)
         assert t.find([99, 3, 333]) == (True, 3)
         assert t.find([99, 333]) == (True, 2)
-        
+
         # non greedy
         assert t.first([99, 3, 4, 333, 222]) == (True, 2)
         assert t.first([99, 3, 333, 3]) == (True, 2)
-
 
     def test_consecutive_any_n(self):
         t = Trie()
@@ -394,20 +379,18 @@ class TestTrie:
         assert t.find([3, 4, 333]) == (True, 3)
         assert t.find([3, 333]) == (True, 2)
         assert t.find([333]) == (True, 1)
-        
+
         assert t.first([3, 4, 333, 222]) == (True, 3)
         assert t.first([3, 333, 3]) == (True, 2)
-
 
     def test_any_n_ambiguous(self):
         t = Trie()
         t.insert([_any_n, 33])
-        assert t.find([0, 33, 33]) == (False, 3)  # only the first 
-
+        assert t.find([0, 33, 33]) == (False, 3)  # only the first
 
     def test_from_string(self):
         assert from_string('_ + _') == [_any, '+', _any]
-        assert from_string('_ ? _+ : _+') == [_any, '?', _any_n, ':', _any_n] 
+        assert from_string('_ ? _+ : _+') == [_any, '?', _any_n, ':', _any_n]
 
     def test_natural(self):
         t = Trie()

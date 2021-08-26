@@ -1,1 +1,1 @@
-from toksic.trie import TestTrie
+from toksic.trie import TestTrie  # noqa: F401

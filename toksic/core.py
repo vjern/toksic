@@ -22,11 +22,11 @@ def count_leading_whitespace(row: str) -> int:
 def level_indentation(rows: List[str]) -> List[str]:
     rows = list(rows)
     # check lowest common level of indentation
-    l = max(0, min(map(count_leading_whitespace, rows)))
+    mlen = max(0, min(map(count_leading_whitespace, rows)))
     # strip it
-    for r in rows:
+    for row in rows:
         # assert not r[:l].strip(), (l, repr(r[:l]))
-        yield r[l:]
+        yield row[mlen:]
 
 
 def print(*a, **kw):
@@ -37,10 +37,12 @@ def print(*a, **kw):
 class Token(str):
     bounds: Tuple[int, int]
     string: str
+
     def set(self, string: str, *bounds: int):
         self.bounds = bounds
         self.string = string
         return self
+
     def dict(self):
         return {
             'text': str(self),
@@ -102,7 +104,7 @@ def tokenize(
             escaped = False
             write(char)
             continue
-        
+
         t = not quoted and specials and specials.get(char)
         if t:
             print(char, 'may be in specials', row[i:])
@@ -111,10 +113,10 @@ def tokenize(
             if ok:
                 print('this is ok')
                 skip += tskip
-                write(row[i:i+tskip])
+                write(row[i:i + tskip])
                 flush(i)
                 continue
-        
+
         if quoted and char == closing_quote:
             write(char)
             flush(i)
@@ -137,7 +139,7 @@ def tokenize(
                 flush(i)
             else:
                 write(char)
-        
+
         elif char in punctuation:
             if not quoted:
                 flush(i)
@@ -146,7 +148,7 @@ def tokenize(
 
         elif char == '#' and i and not quoted:
             break
-            
+
         else:
             if was:
                 # print(f'{was = }')
