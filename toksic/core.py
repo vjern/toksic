@@ -106,16 +106,16 @@ def tokenize(
         t = not quoted and specials and specials.get(char)
         if t:
             print(char, 'may be in specials', row[i:])
-            ok, tskip = t.first(row[i:])
+            ok, tskip = specials.first(row[i:])
             print(ok, tskip)
             if ok:
                 print('this is ok')
                 skip += tskip
-                write(row[i:i+tskip+1])
+                write(row[i:i+tskip])
                 flush(i)
                 continue
         
-        elif quoted and char == closing_quote:
+        if quoted and char == closing_quote:
             write(char)
             flush(i)
             quoted = False

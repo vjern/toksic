@@ -96,3 +96,7 @@ def test_custom_literals():
 
     assert toksic.tokenize(""" 'b =' + "'a' = b" """, literals=[("'", "'"), ('"', '"')]) == ["'b ='", "+", "\"'a' = b\""]
     assert toksic.tokenize("'b =' + {'a' = b}", literals=[("'", "'"), ("{", "}")]) == ["'b ='", "+", "{'a' = b}"]
+
+
+def test_natural_language():
+    assert toksic.tokenize('a not in b', trie.Trie().init(['not in'])) == ['a', 'not in', 'b']
