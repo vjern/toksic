@@ -54,3 +54,17 @@ Only double quotes string literals are supported by default, but you can introdu
 ```
 
 The only limitation is that your string literals must be enclosed by single character symbols, though they can be different.
+
+## Command Line
+
+You can also use this package to tokenize a string literal on the fly:
+
+```sh
+$ python -m toksic "a++ + -b" "++"
+#                   <literal> [, <specials>]*
+a
+++
++
+-
+b
+```
