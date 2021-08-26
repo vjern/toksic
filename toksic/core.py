@@ -1,6 +1,6 @@
 import string
 from builtins import print as builtin_print
-from typing import List, Optional, Tuple
+from typing import Iterable, List, Optional, Tuple
 
 from .trie import Trie
 
@@ -93,6 +93,8 @@ def tokenize(
             ''.join(token_vocs),
         )
 
+    i = 0
+    char = ''
     for i, char in enumerate(row):
 
         print_detail()
@@ -169,3 +171,15 @@ def tokenize(
 
 def retrace_tokens(tokens: List[Token]) -> str:
     return ''.join(t.string for t in tokens)
+
+
+def split(tokens: List[str], sep: str) -> Iterable[List[str]]:
+    batch = []
+    for token in tokens:
+        if token == sep:
+            yield batch
+            batch = []
+        else:
+            batch.append(token)
+    if batch:
+        yield batch
